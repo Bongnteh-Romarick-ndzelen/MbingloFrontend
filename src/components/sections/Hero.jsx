@@ -30,7 +30,7 @@ export default function Hero() {
             subtitle: "The home of passionate football. Follow our journey, watch matches, and support the team.",
             button1: "Upcoming Matches",
             button2: "Learn More",
-            image: "/assets/Player-removebg-preview.png"
+            image: "/assets/Player-removebg-preview.png" // from public/
         },
         {
             title: "Welcome to the Team!",
@@ -124,7 +124,7 @@ export default function Hero() {
                                 </motion.div>
                                 {currentContent === 1 && (
                                     <motion.img
-                                        src={process.env.PUBLIC_URL + "/assets/Player-removebg-preview.png"}
+                                        src="/assets/Player-removebg-preview.png"
                                         alt="Football"
                                         className="absolute w-16 h-16 -top-8 right-1/4"
                                         initial={{ scale: 0 }}
