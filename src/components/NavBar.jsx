@@ -13,7 +13,7 @@ export default function Navbar() {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const navigate = useNavigate();
 
-    const isLoggedIn = Boolean(localStorage.getItem('token'));
+    const isLoggedIn = true; // Replace with actual authentication check logic
 
     const handleLogout = async () => {
         try {
@@ -32,7 +32,7 @@ export default function Navbar() {
             <div className="container mx-auto px-4 py-3 flex justify-between items-center">
                 {/* Logo */}
                 <Link to="/" className="text-2xl font-bold flex items-center gap-2">
-                    <img className="h-10 w-auto" src={logo} alt="Logo" />
+                    <img className="h-10 w-auto" src={'/assets/logo.png'} alt="Logo" />
                 </Link>
 
                 {/* Desktop Navigation */}
@@ -149,3 +149,4 @@ export default function Navbar() {
         </nav>
     );
 }
+
