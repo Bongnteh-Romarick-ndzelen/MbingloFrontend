@@ -6,6 +6,7 @@ import {
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { logoutUser } from '../api/authService';
+import logo from '../assets/logo.png';
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
@@ -31,7 +32,7 @@ export default function Navbar() {
             <div className="container mx-auto px-4 py-3 flex justify-between items-center">
                 {/* Logo */}
                 <Link to="/" className="text-2xl font-bold flex items-center gap-2">
-                    <img className="h-10 w-auto" src="/src/assets/logo.png" alt="Logo" />
+                    <img className="h-10 w-auto" src={logo} alt="Logo" />
                 </Link>
 
                 {/* Desktop Navigation */}
