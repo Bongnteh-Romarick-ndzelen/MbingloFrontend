@@ -3,17 +3,32 @@ import {
     FaBars, FaTimes, FaUser, FaCaretDown,
     FaSignOutAlt, FaCog, FaUserCircle, FaRegComment
 } from 'react-icons/fa';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { logoutUser } from '../api/authService';
-import logo from '../assets/logo.png';
+import { GiSoccerBall } from 'react-icons/gi';
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
     const navigate = useNavigate();
 
     const isLoggedIn = true; // Replace with actual authentication check logic
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 10) {
+                setScrolled(true);
+            } else {
+                setScrolled(false);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     const handleLogout = async () => {
         try {
@@ -28,125 +43,245 @@ export default function Navbar() {
     };
 
     return (
-        <nav className="left-0 w-full z-50 bg-black text-white shadow-md">
-            <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+        <nav className={`fixed left-0 w-full z-50 text-white shadow-md transition-all duration-300 mb-4 ${scrolled ? 'py-2 mb-4 bg-gray-900/95 backdrop-blur-sm' : 'py-3 bg-gray-900'}`}>
+            <div className="container mx-auto px-4 flex justify-between items-center">
                 {/* Logo */}
-                <Link to="/" className="text-2xl font-bold flex items-center gap-2">
-                    <img className="h-10 w-auto" src={'/assets/logo.png'} alt="Logo" />
+                <Link to="/" className="flex items-center gap-3 group">
+                    <GiSoccerBall className="text-3xl text-green-500 group-hover:rotate-180 transition-transform duration-500" />
+                    <span className="text-3xl font-bold text-white">
+                        <span className="text-green-400">Mbinglo</span>FC
+                    </span>
                 </Link>
 
                 {/* Desktop Navigation */}
-                <div className="hidden md:flex items-center space-x-6 font-semibold">
-                    <Link to="/" className="hover:text-white/80 transition">Home</Link>
-                    <Link to="/about" className="hover:text-white/80 transition">About</Link>
-                    <Link to="/matches/upcoming" className="hover:text-white/80 transition">Matches</Link>
-                    <Link to="/chats" className="flex items-center gap-1 hover:text-white/80 transition">
+                <div className="hidden md:flex items-center space-x-8 font-medium">
+                    <Link
+                        to="/"
+                        className="hover:text-amber-300 transition-colors duration-200 relative group"
+                    >
+                        Home
+                        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-amber-300 transition-all duration-300 group-hover:w-full"></span>
+                    </Link>
+                    <Link
+                        to="/about"
+                        className="hover:text-amber-300 transition-colors duration-200 relative group"
+                    >
+                        About
+                        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-amber-300 transition-all duration-300 group-hover:w-full"></span>
+                    </Link>
+                    <Link
+                        to="/matches/upcoming"
+                        className="hover:text-amber-300 transition-colors duration-200 relative group"
+                    >
+                        Matches
+                        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-amber-300 transition-all duration-300 group-hover:w-full"></span>
+                    </Link>
+                    <Link
+                        to="/chats"
+                        className="flex items-center gap-1 hover:text-amber-300 transition-colors duration-200 relative group"
+                    >
                         <FaRegComment className="text-lg" />
                         Chats
+                        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-amber-300 transition-all duration-300 group-hover:w-full"></span>
                     </Link>
-                    <Link to="/contact" className="hover:text-white/80 transition">Contact</Link>
+                    <Link
+                        to="/contact"
+                        className="hover:text-amber-300 transition-colors duration-200 relative group"
+                    >
+                        Contact
+                        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-amber-300 transition-all duration-300 group-hover:w-full"></span>
+                    </Link>
 
                     {/* Profile or Login */}
                     {isLoggedIn ? (
                         <div className="relative">
-                            <button
+                            <motion.button
                                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                className="flex items-center gap-1 hover:text-white/80 transition"
+                                className="flex items-center gap-1 hover:text-amber-300 transition-colors duration-200"
+                                whileHover={{ scale: 1.05 }}
                             >
-                                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                                    <FaUserCircle className="text-xl text-white" />
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center overflow-hidden">
+                                    <FaUserCircle className="text-xl text-gray-900" />
                                 </div>
-                                <FaCaretDown />
-                            </button>
-                            {isProfileOpen && (
-                                <div className="absolute right-0 mt-2 w-48 bg-green-200 text-green-900 rounded-lg shadow-lg z-50 overflow-hidden">
-                                    <Link
-                                        to="/profile"
-                                        className="block px-4 py-2 hover:bg-green-100"
-                                        onClick={() => setIsProfileOpen(false)}
+                                <FaCaretDown className={`transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} />
+                            </motion.button>
+
+                            <AnimatePresence>
+                                {isProfileOpen && (
+                                    <motion.div
+                                        className="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 overflow-hidden"
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        transition={{ duration: 0.2 }}
                                     >
-                                        <FaUser className="inline mr-2" /> Profile
-                                    </Link>
-                                    <Link
-                                        to="/profile/settings"
-                                        className="block px-4 py-2 hover:bg-green-100"
-                                        onClick={() => setIsProfileOpen(false)}
-                                    >
-                                        <FaCog className="inline mr-2" /> Settings
-                                    </Link>
-                                    <div
-                                        className="block px-4 py-2 hover:bg-green-100 cursor-pointer"
-                                        onClick={() => {
-                                            setIsProfileOpen(false);
-                                            handleLogout();
-                                        }}
-                                    >
-                                        <FaSignOutAlt className="inline mr-2" /> Logout
-                                    </div>
-                                </div>
-                            )}
+                                        <Link
+                                            to="/profile"
+                                            className="block px-4 py-3 hover:bg-gray-700 transition-colors duration-200 flex items-center gap-2"
+                                            onClick={() => setIsProfileOpen(false)}
+                                        >
+                                            <FaUser className="text-amber-300" />
+                                            <span>Profile</span>
+                                        </Link>
+                                        <Link
+                                            to="/profile/settings"
+                                            className="block px-4 py-3 hover:bg-gray-700 transition-colors duration-200 flex items-center gap-2"
+                                            onClick={() => setIsProfileOpen(false)}
+                                        >
+                                            <FaCog className="text-amber-300" />
+                                            <span>Settings</span>
+                                        </Link>
+                                        <div
+                                            className="block px-4 py-3 hover:bg-gray-700 transition-colors duration-200 cursor-pointer flex items-center gap-2"
+                                            onClick={() => {
+                                                setIsProfileOpen(false);
+                                                handleLogout();
+                                            }}
+                                        >
+                                            <FaSignOutAlt className="text-amber-300" />
+                                            <span>Logout</span>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     ) : (
-                        <Link
-                            to="/auth/login"
-                            className="bg-white/20 px-4 py-2 rounded-md hover:bg-white/30 transition"
+                        <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                         >
-                            <FaUser className="inline mr-1" /> Login
-                        </Link>
+                            <Link
+                                to="/auth/login"
+                                className="bg-gradient-to-br from-amber-400 to-amber-600 text-gray-900 px-5 py-2 rounded-md hover:from-amber-300 hover:to-amber-500 transition-all duration-200 flex items-center gap-2 font-semibold"
+                            >
+                                <FaUser /> Login
+                            </Link>
+                        </motion.div>
                     )}
                 </div>
 
                 {/* Mobile Toggle Button */}
-                <button
-                    className="md:hidden text-2xl hover:text-white/80 transition"
+                <motion.button
+                    className="md:hidden text-2xl hover:text-amber-300 transition-colors duration-200 z-50"
                     onClick={() => setIsOpen(!isOpen)}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                 >
                     {isOpen ? <FaTimes /> : <FaBars />}
-                </button>
-            </div>
+                </motion.button>
 
-            {/* Mobile Menu */}
-            {isOpen && (
-                <div className="md:hidden bg-black text-white px-4 py-4 space-y-2 font-bold">
-                    <Link to="/" onClick={() => setIsOpen(false)} className="block hover:text-white/80">Home</Link>
-                    <Link to="/about" onClick={() => setIsOpen(false)} className="block hover:text-white/80">About</Link>
-                    <Link to="/matches/upcoming" onClick={() => setIsOpen(false)} className="block hover:text-white/80">Matches</Link>
-                    <Link to="/chats" onClick={() => setIsOpen(false)} className="flex items-center gap-1 hover:text-white/80">
-                        <FaRegComment /> Chats
-                    </Link>
-                    <Link to="/contact" onClick={() => setIsOpen(false)} className="block hover:text-white/80">Contact</Link>
-
-                    {isLoggedIn ? (
+                {/* Mobile Menu */}
+                <AnimatePresence>
+                    {isOpen && (
                         <>
-                            <Link to="/profile" onClick={() => setIsOpen(false)} className="block hover:text-white/80">
-                                <FaUser className="inline mr-2" /> Profile
-                            </Link>
-                            <Link to="/profile/settings" onClick={() => setIsOpen(false)} className="block hover:text-white/80">
-                                <FaCog className="inline mr-2" /> Settings
-                            </Link>
-                            <div
-                                onClick={() => {
-                                    setIsOpen(false);
-                                    handleLogout();
-                                }}
-                                className="block w-full text-left hover:text-white/80 cursor-pointer"
+                            <motion.div
+                                className="fixed inset-0 bg-black/70 z-40 md:hidden"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => setIsOpen(false)}
+                            />
+
+                            <motion.div
+                                className="fixed top-0 left-0 h-full w-3/4 max-w-sm bg-gray-900/95 backdrop-blur-sm z-40 shadow-2xl md:hidden flex flex-col pt-20 px-6 border-r border-gray-800"
+                                initial={{ x: '-100%' }}
+                                animate={{ x: 0 }}
+                                exit={{ x: '-100%' }}
+                                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                             >
-                                <FaSignOutAlt className="inline mr-2" /> Logout
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            <Link to="/auth/login" onClick={() => setIsOpen(false)} className="block hover:text-white/80">
-                                <FaUser className="inline mr-2" /> Login
-                            </Link>
-                            <Link to="/auth/signup" onClick={() => setIsOpen(false)} className="block hover:text-white/80">
-                                <FaUser className="inline mr-2" /> Signup
-                            </Link>
+                                <div className="flex-1 space-y-6 overflow-y-auto pb-10">
+                                    <Link
+                                        to="/"
+                                        onClick={() => setIsOpen(false)}
+                                        className="block text-xl hover:text-amber-300 transition-colors duration-200 py-2"
+                                    >
+                                        Home
+                                    </Link>
+                                    <Link
+                                        to="/about"
+                                        onClick={() => setIsOpen(false)}
+                                        className="block text-xl hover:text-amber-300 transition-colors duration-200 py-2"
+                                    >
+                                        About
+                                    </Link>
+                                    <Link
+                                        to="/matches/upcoming"
+                                        onClick={() => setIsOpen(false)}
+                                        className="block text-xl hover:text-amber-300 transition-colors duration-200 py-2"
+                                    >
+                                        Matches
+                                    </Link>
+                                    <Link
+                                        to="/chats"
+                                        onClick={() => setIsOpen(false)}
+                                        className="flex items-center gap-3 text-xl hover:text-amber-300 transition-colors duration-200 py-2"
+                                    >
+                                        <FaRegComment /> Chats
+                                    </Link>
+                                    <Link
+                                        to="/contact"
+                                        onClick={() => setIsOpen(false)}
+                                        className="block text-xl hover:text-amber-300 transition-colors duration-200 py-2"
+                                    >
+                                        Contact
+                                    </Link>
+
+                                    <div className="pt-6 border-t border-gray-800 mt-6">
+                                        {isLoggedIn ? (
+                                            <>
+                                                <Link
+                                                    to="/profile"
+                                                    onClick={() => setIsOpen(false)}
+                                                    className="flex items-center gap-3 text-xl hover:text-amber-300 transition-colors duration-200 py-3"
+                                                >
+                                                    <FaUser /> Profile
+                                                </Link>
+                                                <Link
+                                                    to="/profile/settings"
+                                                    onClick={() => setIsOpen(false)}
+                                                    className="flex items-center gap-3 text-xl hover:text-amber-300 transition-colors duration-200 py-3"
+                                                >
+                                                    <FaCog /> Settings
+                                                </Link>
+                                                <div
+                                                    onClick={() => {
+                                                        setIsOpen(false);
+                                                        handleLogout();
+                                                    }}
+                                                    className="flex items-center gap-3 text-xl hover:text-amber-300 transition-colors duration-200 py-3 cursor-pointer"
+                                                >
+                                                    <FaSignOutAlt /> Logout
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Link
+                                                    to="/auth/login"
+                                                    onClick={() => setIsOpen(false)}
+                                                    className="flex items-center gap-3 text-xl hover:text-amber-300 transition-colors duration-200 py-3"
+                                                >
+                                                    <FaUser /> Login
+                                                </Link>
+                                                <Link
+                                                    to="/auth/signup"
+                                                    onClick={() => setIsOpen(false)}
+                                                    className="flex items-center gap-3 text-xl hover:text-amber-300 transition-colors duration-200 py-3"
+                                                >
+                                                    <FaUser /> Sign Up
+                                                </Link>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="py-6 text-center text-gray-500 text-sm">
+                                    © {new Date().getFullYear()} Your Brand
+                                </div>
+                            </motion.div>
                         </>
                     )}
-                </div>
-            )}
+                </AnimatePresence>
+            </div>
         </nav>
     );
 }
-
