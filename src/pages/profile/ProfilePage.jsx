@@ -70,7 +70,7 @@ export default function ProfilePage() {
         <div className="min-h-screen bg-gradient-to-br from-[#0b3d2e] to-[#0d1f1a] text-white px-4 py-8">
             <div className="max-w-6xl mx-auto">
                 {/* Header with notification */}
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex justify-between items-center mb-6 mt-15">
                     <h1 className="text-2xl font-bold text-green-300">Profile</h1>
                     <div className="relative">
                         <button 

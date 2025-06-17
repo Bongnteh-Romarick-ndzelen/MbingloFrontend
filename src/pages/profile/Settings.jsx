@@ -149,7 +149,7 @@ export default function EditProfilePage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#0b3d2e] to-[#0d1f1a] text-white px-4 py-8">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-4xl mx-auto mt-6">
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}

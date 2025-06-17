@@ -15,28 +15,36 @@ export default function Navbar() {
     const [scrolled, setScrolled] = useState(false);
     const navigate = useNavigate();
 
-    const isLoggedIn = true; // Replace with actual authentication check logic
+    const isLoggedIn = true; // Replace with actual auth logic
 
     useEffect(() => {
         const handleScroll = () => {
-            if (window.scrollY > 10) {
-                setScrolled(true);
-            } else {
-                setScrolled(false);
-            }
+            setScrolled(window.scrollY > 10);
         };
 
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    // Lock body scroll when mobile menu is open
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isOpen]);
+
     const handleLogout = async () => {
         try {
-            await logoutUser(); // backend logout route
+            await logoutUser();
         } catch (err) {
             console.error('Logout error:', err);
         }
-
         localStorage.removeItem('token');
         toast.success('Logged out successfully!');
         navigate('/auth/login');
@@ -53,46 +61,26 @@ export default function Navbar() {
                     </span>
                 </Link>
 
-                {/* Desktop Navigation */}
+                {/* Desktop Nav */}
                 <div className="hidden md:flex items-center space-x-8 font-medium">
-                    <Link
-                        to="/"
-                        className="hover:text-amber-300 transition-colors duration-200 relative group"
-                    >
-                        Home
-                        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-amber-300 transition-all duration-300 group-hover:w-full"></span>
-                    </Link>
-                    <Link
-                        to="/about"
-                        className="hover:text-amber-300 transition-colors duration-200 relative group"
-                    >
-                        About
-                        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-amber-300 transition-all duration-300 group-hover:w-full"></span>
-                    </Link>
-                    <Link
-                        to="/matches/upcoming"
-                        className="hover:text-amber-300 transition-colors duration-200 relative group"
-                    >
-                        Matches
-                        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-amber-300 transition-all duration-300 group-hover:w-full"></span>
-                    </Link>
+                    {['Home', 'About', 'Matches', 'Contact'].map((item, idx) => (
+                        <Link
+                            key={idx}
+                            to={item === 'Matches' ? '/matches/upcoming' : `/${item.toLowerCase()}`}
+                            className="hover:text-amber-300 transition-colors duration-200 relative group"
+                        >
+                            {item}
+                            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-amber-300 transition-all duration-300 group-hover:w-full"></span>
+                        </Link>
+                    ))}
                     <Link
                         to="/chats"
                         className="flex items-center gap-1 hover:text-amber-300 transition-colors duration-200 relative group"
                     >
-                        <FaRegComment className="text-lg" />
-                        Chats
-                        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-amber-300 transition-all duration-300 group-hover:w-full"></span>
-                    </Link>
-                    <Link
-                        to="/contact"
-                        className="hover:text-amber-300 transition-colors duration-200 relative group"
-                    >
-                        Contact
+                        <FaRegComment className="text-lg" /> Chats
                         <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-amber-300 transition-all duration-300 group-hover:w-full"></span>
                     </Link>
 
-                    {/* Profile or Login */}
                     {isLoggedIn ? (
                         <div className="relative">
                             <motion.button
@@ -115,44 +103,24 @@ export default function Navbar() {
                                         exit={{ opacity: 0, y: -10 }}
                                         transition={{ duration: 0.2 }}
                                     >
-                                        <Link
-                                            to="/profile"
-                                            className="block px-4 py-3 hover:bg-gray-700 transition-colors duration-200 flex items-center gap-2"
-                                            onClick={() => setIsProfileOpen(false)}
-                                        >
-                                            <FaUser className="text-amber-300" />
-                                            <span>Profile</span>
+                                        <Link to="/profile" onClick={() => setIsProfileOpen(false)} className="block px-4 py-3 hover:bg-gray-700 flex items-center gap-2">
+                                            <FaUser className="text-amber-300" /> Profile
                                         </Link>
-                                        <Link
-                                            to="/profile/settings"
-                                            className="block px-4 py-3 hover:bg-gray-700 transition-colors duration-200 flex items-center gap-2"
-                                            onClick={() => setIsProfileOpen(false)}
-                                        >
-                                            <FaCog className="text-amber-300" />
-                                            <span>Settings</span>
+                                        <Link to="/profile/settings" onClick={() => setIsProfileOpen(false)} className="block px-4 py-3 hover:bg-gray-700 flex items-center gap-2">
+                                            <FaCog className="text-amber-300" /> Settings
                                         </Link>
-                                        <div
-                                            className="block px-4 py-3 hover:bg-gray-700 transition-colors duration-200 cursor-pointer flex items-center gap-2"
-                                            onClick={() => {
-                                                setIsProfileOpen(false);
-                                                handleLogout();
-                                            }}
-                                        >
-                                            <FaSignOutAlt className="text-amber-300" />
-                                            <span>Logout</span>
+                                        <div onClick={() => { setIsProfileOpen(false); handleLogout(); }} className="block px-4 py-3 hover:bg-gray-700 cursor-pointer flex items-center gap-2">
+                                            <FaSignOutAlt className="text-amber-300" /> Logout
                                         </div>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
                         </div>
                     ) : (
-                        <motion.div
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                        >
+                        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                             <Link
                                 to="/auth/login"
-                                className="bg-gradient-to-br from-amber-400 to-amber-600 text-gray-900 px-5 py-2 rounded-md hover:from-amber-300 hover:to-amber-500 transition-all duration-200 flex items-center gap-2 font-semibold"
+                                className="bg-gradient-to-br from-amber-400 to-amber-600 text-gray-900 px-5 py-2 rounded-md hover:from-amber-300 hover:to-amber-500 flex items-center gap-2 font-semibold"
                             >
                                 <FaUser /> Login
                             </Link>
@@ -160,7 +128,7 @@ export default function Navbar() {
                     )}
                 </div>
 
-                {/* Mobile Toggle Button */}
+                {/* Mobile Toggle */}
                 <motion.button
                     className="md:hidden text-2xl hover:text-amber-300 transition-colors duration-200 z-50"
                     onClick={() => setIsOpen(!isOpen)}
@@ -181,99 +149,47 @@ export default function Navbar() {
                                 exit={{ opacity: 0 }}
                                 onClick={() => setIsOpen(false)}
                             />
-
                             <motion.div
-                                className="fixed top-0 left-0 h-full w-3/4 max-w-sm bg-gray-900/95 backdrop-blur-sm z-40 shadow-2xl md:hidden flex flex-col pt-20 px-6 border-r border-gray-800"
+                                className="fixed top-0 left-0 h-screen w-3/4 max-w-sm bg-gray-900/95 backdrop-blur-sm z-50 shadow-2xl md:hidden flex flex-col pt-20 px-6 border-r border-gray-800 overflow-y-auto"
                                 initial={{ x: '-100%' }}
                                 animate={{ x: 0 }}
                                 exit={{ x: '-100%' }}
                                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                             >
                                 <div className="flex-1 space-y-6 overflow-y-auto pb-10">
-                                    <Link
-                                        to="/"
-                                        onClick={() => setIsOpen(false)}
-                                        className="block text-xl hover:text-amber-300 transition-colors duration-200 py-2"
-                                    >
-                                        Home
-                                    </Link>
-                                    <Link
-                                        to="/about"
-                                        onClick={() => setIsOpen(false)}
-                                        className="block text-xl hover:text-amber-300 transition-colors duration-200 py-2"
-                                    >
-                                        About
-                                    </Link>
-                                    <Link
-                                        to="/matches/upcoming"
-                                        onClick={() => setIsOpen(false)}
-                                        className="block text-xl hover:text-amber-300 transition-colors duration-200 py-2"
-                                    >
-                                        Matches
-                                    </Link>
-                                    <Link
-                                        to="/chats"
-                                        onClick={() => setIsOpen(false)}
-                                        className="flex items-center gap-3 text-xl hover:text-amber-300 transition-colors duration-200 py-2"
-                                    >
+                                    <Link to="/" onClick={() => setIsOpen(false)} className="block text-xl hover:text-amber-300 py-2">Home</Link>
+                                    <Link to="/about" onClick={() => setIsOpen(false)} className="block text-xl hover:text-amber-300 py-2">About</Link>
+                                    <Link to="/matches/upcoming" onClick={() => setIsOpen(false)} className="block text-xl hover:text-amber-300 py-2">Matches</Link>
+                                    <Link to="/chats" onClick={() => setIsOpen(false)} className="flex items-center gap-3 text-xl hover:text-amber-300 py-2">
                                         <FaRegComment /> Chats
                                     </Link>
-                                    <Link
-                                        to="/contact"
-                                        onClick={() => setIsOpen(false)}
-                                        className="block text-xl hover:text-amber-300 transition-colors duration-200 py-2"
-                                    >
-                                        Contact
-                                    </Link>
+                                    <Link to="/contact" onClick={() => setIsOpen(false)} className="block text-xl hover:text-amber-300 py-2">Contact</Link>
 
                                     <div className="pt-6 border-t border-gray-800 mt-6">
                                         {isLoggedIn ? (
                                             <>
-                                                <Link
-                                                    to="/profile"
-                                                    onClick={() => setIsOpen(false)}
-                                                    className="flex items-center gap-3 text-xl hover:text-amber-300 transition-colors duration-200 py-3"
-                                                >
+                                                <Link to="/profile" onClick={() => setIsOpen(false)} className="flex items-center gap-3 text-xl hover:text-amber-300 py-3">
                                                     <FaUser /> Profile
                                                 </Link>
-                                                <Link
-                                                    to="/profile/settings"
-                                                    onClick={() => setIsOpen(false)}
-                                                    className="flex items-center gap-3 text-xl hover:text-amber-300 transition-colors duration-200 py-3"
-                                                >
+                                                <Link to="/profile/settings" onClick={() => setIsOpen(false)} className="flex items-center gap-3 text-xl hover:text-amber-300 py-3">
                                                     <FaCog /> Settings
                                                 </Link>
-                                                <div
-                                                    onClick={() => {
-                                                        setIsOpen(false);
-                                                        handleLogout();
-                                                    }}
-                                                    className="flex items-center gap-3 text-xl hover:text-amber-300 transition-colors duration-200 py-3 cursor-pointer"
-                                                >
+                                                <div onClick={() => { setIsOpen(false); handleLogout(); }} className="flex items-center gap-3 text-xl hover:text-amber-300 py-3 cursor-pointer">
                                                     <FaSignOutAlt /> Logout
                                                 </div>
                                             </>
                                         ) : (
                                             <>
-                                                <Link
-                                                    to="/auth/login"
-                                                    onClick={() => setIsOpen(false)}
-                                                    className="flex items-center gap-3 text-xl hover:text-amber-300 transition-colors duration-200 py-3"
-                                                >
+                                                <Link to="/auth/login" onClick={() => setIsOpen(false)} className="flex items-center gap-3 text-xl hover:text-amber-300 py-3">
                                                     <FaUser /> Login
                                                 </Link>
-                                                <Link
-                                                    to="/auth/signup"
-                                                    onClick={() => setIsOpen(false)}
-                                                    className="flex items-center gap-3 text-xl hover:text-amber-300 transition-colors duration-200 py-3"
-                                                >
+                                                <Link to="/auth/signup" onClick={() => setIsOpen(false)} className="flex items-center gap-3 text-xl hover:text-amber-300 py-3">
                                                     <FaUser /> Sign Up
                                                 </Link>
                                             </>
                                         )}
                                     </div>
                                 </div>
-
                                 <div className="py-6 text-center text-gray-500 text-sm">
                                     © {new Date().getFullYear()} MbingloFC
                                 </div>

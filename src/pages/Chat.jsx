@@ -1,30 +1,86 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaPaperPlane, FaImage, FaVideo, FaCheck, FaTimes, FaReply, FaTrash, FaArrowRight, FaEdit } from 'react-icons/fa';
+import { FaPaperPlane, FaImage, FaVideo, FaCheck, FaTimes, FaReply, FaTrash, FaEdit, FaSmile, FaMicrophone } from 'react-icons/fa';
+import { IoMdSend } from 'react-icons/io';
+import EmojiPicker from 'emoji-picker-react';
 
 export default function Chat() {
     const [chatData, setChatData] = useState([
-        { id: 1, username: 'You', message: "Choose the option that best fits your project's existing icon library or preferences.", time: '10:15 AM' },
-        { id: 2, username: 'Bob', message: 'Absolutely! Can’t wait! I’m so excited to see you!', time: '10:17 AM' },
-        { id: 3, username: 'Young Elvis', message: "Choose the option that best fits your project's existing icon library or preferences.", time: '10:15 AM' },
-        { id: 4, username: 'Daniel', message: 'Absolutely! Can’t wait! I’m so excited to see you! The TiC Foundation is an organization that leverages technology to develop innovative solutions to everyday problems plaguing African communities.', time: '10:17 AM' },
-        { id: 5, username: 'Emeka Paul', message: "Choose the option that best fits your project's existing icon library or preferences. The TiC Foundation is an organization that leverages technology to develop innovative solutions to everyday problems plaguing African communities.", time: '10:15 AM' },
-        { id: 6, username: 'Brain Smith', message: 'Absolutely! Can’t wait! I’m so excited to see you! The TiC Foundation is an organization that leverages technology to develop innovative solutions to everyday problems plaguing African communities.', time: '10:17 AM' },
+        { 
+            id: 1, 
+            username: 'You', 
+            message: "Choose the option that best fits your project's existing icon library or preferences.", 
+            time: '10:15 AM',
+            status: 'read',
+            avatar: 'https://randomuser.me/api/portraits/men/1.jpg'
+        },
+        { 
+            id: 2, 
+            username: 'Bob', 
+            message: 'Absolutely! Can\'t wait! I\'m so excited to see you!', 
+            time: '10:17 AM',
+            avatar: 'https://randomuser.me/api/portraits/men/2.jpg'
+        },
+        { 
+            id: 3, 
+            username: 'Alice', 
+            message: 'The meeting has been rescheduled to 3 PM tomorrow.', 
+            time: '10:20 AM',
+            avatar: 'https://randomuser.me/api/portraits/women/1.jpg'
+        },
+        { 
+            id: 4, 
+            username: 'Charlie', 
+            message: 'I\'ve shared the document with everyone. Please review it when you get a chance.', 
+            time: '10:25 AM',
+            avatar: 'https://randomuser.me/api/portraits/men/3.jpg'
+        },
+        { 
+            id: 5, 
+            username: 'You', 
+            message: 'Thanks everyone for the updates!', 
+            time: '10:30 AM',
+            status: 'sent',
+            avatar: 'https://randomuser.me/api/portraits/men/1.jpg'
+        },
+        { 
+            id: 6, 
+            username: 'Diana', 
+            message: 'Don\'t forget about the team lunch on Friday!', 
+            time: '10:35 AM',
+            avatar: 'https://randomuser.me/api/portraits/women/2.jpg'
+        }
     ]);
 
     const [message, setMessage] = useState('');
     const [media, setMedia] = useState(null);
     const [replyTo, setReplyTo] = useState(null);
     const [editingId, setEditingId] = useState(null);
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [isRecording, setIsRecording] = useState(false);
     const messagesEndRef = useRef(null);
-    const imageInputRef = useRef();
-    const videoInputRef = useRef();
+    const fileInputRef = useRef(null);
+    const inputRef = useRef(null);
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [chatData]);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
 
     const handleSend = (e) => {
         e.preventDefault();
         if (!message.trim() && !media) return;
 
         if (editingId) {
-            setChatData(prev => prev.map(m => m.id === editingId ? { ...m, message, media: media?.preview || null, mediaType: media?.type || null } : m));
+            setChatData(prev => prev.map(m => m.id === editingId ? { 
+                ...m, 
+                message, 
+                media: media?.preview || null, 
+                mediaType: media?.type || null,
+                edited: true 
+            } : m));
             setEditingId(null);
         } else {
             const newMessage = {
@@ -35,6 +91,8 @@ export default function Chat() {
                 mediaType: media ? media.type : null,
                 replyTo,
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                status: 'sent',
+                avatar: 'https://randomuser.me/api/portraits/men/1.jpg'
             };
             setChatData([...chatData, newMessage]);
         }
@@ -42,138 +100,264 @@ export default function Chat() {
         setMessage('');
         setMedia(null);
         setReplyTo(null);
+        setShowEmojiPicker(false);
     };
 
-    const handleFileChange = (e, type) => {
+    const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            const preview = URL.createObjectURL(file);
-            setMedia({ file, type, preview });
+            const type = file.type.startsWith('image') ? 'image' : 
+                        file.type.startsWith('video') ? 'video' : null;
+            if (type) {
+                const preview = URL.createObjectURL(file);
+                setMedia({ file, type, preview });
+            }
         }
     };
 
-    const scrollToMessage = (id) => {
-        const el = document.getElementById(`msg-${ id }`);
-        if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            el.classList.add('ring', 'ring-green-500');
-            setTimeout(() => el.classList.remove('ring', 'ring-green-500'), 2000);
+    const handleReply = (messageId) => {
+        const messageToReply = chatData.find(m => m.id === messageId);
+        setReplyTo(messageToReply);
+        inputRef.current.focus();
+    };
+
+    const handleEdit = (messageId) => {
+        const messageToEdit = chatData.find(m => m.id === messageId);
+        setMessage(messageToEdit.message);
+        if (messageToEdit.media) {
+            setMedia({ preview: messageToEdit.media, type: messageToEdit.mediaType });
         }
+        setEditingId(messageId);
+        inputRef.current.focus();
     };
 
-    const handleEdit = (chat) => {
-        setMessage(chat.message);
-        if (chat.media) setMedia({ preview: chat.media, type: chat.mediaType });
-        setReplyTo(chat.replyTo || null);
-        setEditingId(chat.id);
+    const handleDelete = (messageId) => {
+        setChatData(prev => prev.map(m => 
+            m.id === messageId ? { ...m, message: null, media: null, isDeleted: true } : m
+        ));
     };
 
-    const handleDelete = (chatId) => {
-        setChatData(prev => prev.map(m => m.id === chatId ? { ...m, message: '[message deleted]', media: null, mediaType: null } : m));
+    const cancelReply = () => {
+        setReplyTo(null);
     };
 
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [chatData]);
+    const cancelEdit = () => {
+        setEditingId(null);
+        setMessage('');
+        setMedia(null);
+    };
 
     return (
-        <div className="min-h-screen bg-[#34382f] bg-opacity-50 flex flex-col justify-between text-white">
-            <header className="text-center py-6 shadow-md">
-                <h1 className="text-3xl font-bold text-green-100">All Conversations</h1>
-                <hr />
+        <div className="min-h-screen bg-[#1a2a1f] flex pt-3 flex-col">
+            {/* Header */}
+            <header className="bg-[#10291f] text-center py-4 my-4 px-6 shadow-lg sticky z-10">
+                <h1 className="text-xl font-semibold text-green-100 mt-7">Group Chat</h1>
+                <p className="text-xs text-green-300 mt-1">3 members online</p>
             </header>
 
-            <div className="flex-1 overflow-y-auto p-4 pb-32 space-y-2 max-w-3xl mx-auto w-full">
+            {/* Chat Messages */}
+            <div className="flex-1 overflow-y-auto p-4 pb-24 space-y-3 max-w-3xl mx-auto w-full">
                 {chatData.map(chat => (
-                    <div
-                        key={chat.id}
-                        id={`msg-${ chat.id }`}
-                        className={`relative p-3 max-w-xl transition rounded-xl ${ chat.username === 'You' ? 'ml-auto bg-[rgba(16,41,16,0.7)]' : 'bg-[#10291f]' }`}
-                    >
-                        <div className="text-sm font-bold text-green-400">{chat.username}</div>
-                        {chat.replyTo && (
-                            <div className="bg-green-800/30 text-sm p-2 rounded mb-1 border-l-4 border-green-500">
-                                <span onClick={() => scrollToMessage(chat.replyTo.id)} className="text-green-100 cursor-pointer hover:text-white">
-                                    <span className="font-semibold">{chat.replyTo.username}:</span> {chat.replyTo.message}
-                                </span>
-                            </div>
+                    <div key={chat.id} className={`relative flex items-start group ${chat.username === 'You' ? 'justify-end' : ''}`}>
+                        {chat.username !== 'You' && !chat.isDeleted && (
+                            <img 
+                                src={chat.avatar} 
+                                alt={chat.username}
+                                className="w-8 h-8 rounded-full object-cover mr-2 flex-shrink-0"
+                            />
                         )}
-                        <div className="text-white whitespace-pre-wrap">{chat.message}</div>
-                        {chat.media && chat.mediaType === 'image' && <img src={chat.media} alt="uploaded" className="mt-2 w-[95%] h-auto rounded-lg object-cover" />}
-                        {chat.media && chat.mediaType === 'video' && <video src={chat.media} controls className="mt-2 w-[95%] h-auto rounded-lg" />}
-
-                        <div className="flex justify-between items-center mt-1 text-xs text-green-300">
-                            <span>{chat.time}</span>
-                            {chat.username === 'You' ? (
-                                <div className="flex items-center gap-3">
-                                    <span className="flex items-center text-green-400"><FaCheck className="mr-1" size={12} />Sent</span>
-                                    <button onClick={() => handleEdit(chat)} className="flex items-center text-blue-400 hover:text-white"><FaEdit className="mr-1" size={12} />Edit</button>
-                                    <button onClick={() => handleDelete(chat.id)} className="flex items-center text-red-400 hover:text-white"><FaTrash className="mr-1" size={12} />Delete</button>
-                                    <button onClick={() => setReplyTo({ id: chat.id, username: chat.username, message: chat.message })} className="flex items-center text-green-400 hover:text-white"><FaReply className="mr-1" size={12} />Reply</button>
-                                </div>
+                        
+                        <div className={`max-w-xs md:max-w-md rounded-lg px-4 py-2 relative ${chat.username === 'You' ? 'bg-green-600 rounded-tr-none' : 'bg-green-800 rounded-tl-none'}`}>
+                            {chat.isDeleted ? (
+                                <div className="text-gray-300 italic text-sm">Message deleted</div>
                             ) : (
-                                    <button onClick={() => setReplyTo({ id: chat.id, username: chat.username, message: chat.message })} className="flex items-center text-green-400 hover:text-white"><FaReply className="mr-1" size={12} />Reply</button>
+                                <>
+                                    {chat.replyTo && (
+                                        <div className="bg-green-900/50 text-xs rounded px-2 py-1 border-l-2 border-green-500 mb-1 truncate">
+                                            <p className="font-semibold text-green-300">{chat.replyTo.username}</p>
+                                            <p className="text-green-200 truncate">{chat.replyTo.message}</p>
+                                        </div>
+                                    )}
+                                    
+                                    {chat.media && (
+                                        <div className="mb-2 rounded overflow-hidden">
+                                            {chat.mediaType === 'image' ? (
+                                                <img src={chat.media} alt="Sent media" className="max-w-full h-auto rounded" />
+                                            ) : (
+                                                <video controls className="max-w-full h-auto rounded">
+                                                    <source src={chat.media} type="video/mp4" />
+                                                </video>
+                                            )}
+                                        </div>
+                                    )}
+                                    
+                                    <div className="flex items-end justify-between">
+                                        <div>
+                                            {chat.username !== 'You' && (
+                                                <p className="text-xs font-semibold text-green-300">{chat.username}</p>
+                                            )}
+                                            <p className="text-white text-sm">{chat.message}</p>
+                                        </div>
+                                        <div className="flex items-center ml-2">
+                                            <span className="text-xs text-green-200 mr-1">{chat.time}</span>
+                                            {chat.username === 'You' && chat.status === 'read' && (
+                                                <FaCheck className="text-blue-300 text-xs" />
+                                            )}
+                                            {chat.username === 'You' && chat.status === 'sent' && (
+                                                <FaCheck className="text-gray-300 text-xs" />
+                                            )}
+                                            {chat.edited && (
+                                                <span className="text-xs text-green-300 ml-1">(edited)</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                            
+                            {!chat.isDeleted && (
+                                <div className={`absolute -top-2 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity ${chat.username === 'You' ? '-left-2' : '-right-2'}`}>
+                                    <button 
+                                        onClick={() => handleReply(chat.id)}
+                                        className="bg-green-700 hover:bg-green-600 text-white p-1 rounded-full"
+                                    >
+                                        <FaReply size={10} />
+                                    </button>
+                                    {chat.username === 'You' && (
+                                        <>
+                                            <button 
+                                                onClick={() => handleEdit(chat.id)}
+                                                className="bg-green-700 hover:bg-green-600 text-white p-1 rounded-full"
+                                            >
+                                                <FaEdit size={10} />
+                                            </button>
+                                            <button 
+                                                onClick={() => handleDelete(chat.id)}
+                                                className="bg-red-700 hover:bg-red-600 text-white p-1 rounded-full"
+                                            >
+                                                <FaTrash size={10} />
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
                             )}
                         </div>
+                        
+                        {chat.username === 'You' && !chat.isDeleted && (
+                            <img 
+                                src={chat.avatar} 
+                                alt={chat.username}
+                                className="w-8 h-8 rounded-full object-cover ml-2 flex-shrink-0"
+                            />
+                        )}
                     </div>
                 ))}
-
-                {(message.trim() || media) && (
-                    <div className="p-3 max-w-xl ml-auto bg-[#1f3e2e] rounded-xl mb-2">
-                        <div className="text-sm font-bold text-green-300">You</div>
-                        {replyTo && (
-                            <div className="bg-green-800/30 text-sm p-2 rounded mb-1 border-l-4 border-green-500">
-                                <span className="font-semibold">{replyTo.username}:</span> {replyTo.message}
-                            </div>
-                        )}
-                        <div className="text-white whitespace-pre-wrap">{message}</div>
-                        {media?.type === 'image' && <img src={media.preview} alt="preview" className="mt-2 w-[95%] h-auto rounded-lg object-cover" />}
-                        {media?.type === 'video' && <video src={media.preview} controls className="mt-2 w-[95%] h-auto rounded-lg" />}
-                        <div className="flex justify-end items-center gap-2 text-xs text-green-300 mt-1">
-                            <span>Draft</span>
-                            <FaPaperPlane size={12} />
-                            <FaCheck size={12} />
-                        </div>
-                    </div>
-                )}
-
                 <div ref={messagesEndRef} />
             </div>
 
-            <form onSubmit={handleSend} className="fixed bottom-0 w-full bg-black border-t border-green-900 p-4">
-                <div className="max-w-2xl mx-auto">
-                    {replyTo && (
-                        <div className="bg-green-800 text-sm rounded-t px-4 py-2 border-l-4 border-green-500 mb-1 flex justify-between items-center">
+            {/* Message Input */}
+            <form onSubmit={handleSend} className="bg-[#0c1f17] border-t border-green-900/50 p-3 sticky bottom-0">
+                <div className="max-w-3xl mx-auto relative">
+                    {(replyTo || editingId) && (
+                        <div className="bg-green-800 text-xs rounded-t px-3 py-2 border-l-4 border-green-500 mb-1 flex justify-between items-center">
                             <div>
-                                Replying to <span className="font-bold">{replyTo.username}</span>: {replyTo.message}
+                                <p className="font-semibold text-green-300">
+                                    {editingId ? 'Editing' : 'Replying to'} {replyTo?.username || chatData.find(m => m.id === editingId)?.username}
+                                </p>
+                                <p className="text-green-200 truncate">
+                                    {replyTo?.message || chatData.find(m => m.id === editingId)?.message}
+                                </p>
                             </div>
-                            <button onClick={() => setReplyTo(null)} type="button">
-                                <FaTimes size={14} className="text-green-300 hover:text-white" />
+                            <button 
+                                type="button" 
+                                onClick={editingId ? cancelEdit : cancelReply}
+                                className="text-green-300 hover:text-white"
+                            >
+                                <FaTimes size={12} />
                             </button>
                         </div>
                     )}
 
-                    <div className="relative flex items-center bg-green-900 rounded-full px-4 py-2 border border-green-800 focus-within:ring-2 focus-within:ring-green-500">
-                        <input type="file" accept="image/*" ref={imageInputRef} onChange={(e) => handleFileChange(e, 'image')} className="hidden" />
-                        <input type="file" accept="video/*" ref={videoInputRef} onChange={(e) => handleFileChange(e, 'video')} className="hidden" />
-
-                        <button type="button" onClick={() => imageInputRef.current.click()} className="text-green-300 hover:text-white mr-2">
-                            <FaImage size={18} />
+                    <div className="relative flex items-center bg-green-900/80 rounded-full px-3 py-2 border border-green-800/50 focus-within:ring-2 focus-within:ring-green-500/50 transition-all">
+                        <button 
+                            type="button" 
+                            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                            className="text-green-300 hover:text-white p-1.5 rounded-full hover:bg-green-800/50 transition-colors"
+                        >
+                            <FaSmile size={16} />
                         </button>
-                        <button type="button" onClick={() => videoInputRef.current.click()} className="text-green-300 hover:text-white mr-2">
-                            <FaVideo size={18} />
+                        
+                        {showEmojiPicker && (
+                            <div className="absolute bottom-12 left-0 z-50 shadow-lg">
+                                <EmojiPicker
+                                    onEmojiClick={(emojiData) => {
+                                        setMessage(prev => prev + emojiData.emoji);
+                                        setShowEmojiPicker(false);
+                                    }}
+                                    width={300}
+                                    height={350}
+                                    previewConfig={{ showPreview: false }}
+                                    theme="dark"
+                                    skinTonesDisabled
+                                    searchDisabled
+                                    suggestedEmojisMode={false}
+                                    lazyLoadEmojis
+                                    emojiStyle="native"
+                                    styles={{
+                                        emojiPicker: {
+                                            backgroundColor: '#0c1f17',
+                                            borderColor: '#1a2a1f',
+                                        },
+                                        search: {
+                                            backgroundColor: '#10291f',
+                                            borderColor: '#1a2a1f',
+                                        },
+                                        emoji: {
+                                            hoverBackgroundColor: '#1a2a1f',
+                                        },
+                                        categoryLabel: {
+                                            backgroundColor: '#0c1f17',
+                                        }
+                                    }}
+                                />
+                            </div>
+                        )}
+
+                        <input 
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileChange}
+                            accept="image/*,video/*"
+                            className="hidden"
+                        />
+                        <button 
+                            type="button" 
+                            onClick={() => fileInputRef.current.click()}
+                            className="text-green-300 hover:text-white p-1.5 rounded-full hover:bg-green-800/50 transition-colors"
+                        >
+                            <FaImage size={16} />
                         </button>
 
                         <input
+                            ref={inputRef}
                             type="text"
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
                             placeholder="Type your message..."
-                            className="flex-1 bg-transparent text-white placeholder-green-100 focus:outline-none"
+                            className="flex-1 bg-transparent text-white placeholder-green-300/80 focus:outline-none px-2 py-1 text-sm mx-1"
                         />
 
-                        <button type="submit" className="text-green-100 hover:text-white ml-2">
-                            <FaPaperPlane size={18} />
+                        <button 
+                            type={message.trim() || media ? "submit" : "button"}
+                            onClick={!message.trim() && !media ? () => setIsRecording(!isRecording) : null}
+                            className={`p-2 rounded-full transition-colors ${
+                                isRecording ? 'bg-red-600 animate-pulse' : 'bg-green-600 hover:bg-green-500'
+                            }`}
+                        >
+                            {message.trim() || media ? (
+                                <IoMdSend size={16} className="text-white" />
+                            ) : (
+                                <FaMicrophone size={16} className="text-white" />
+                            )}
                         </button>
                     </div>
                 </div>
