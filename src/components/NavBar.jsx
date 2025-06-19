@@ -62,11 +62,12 @@ export default function Navbar() {
                 </Link>
 
                 {/* Desktop Nav */}
+                {/* Desktop Nav */}
                 <div className="hidden md:flex items-center space-x-8 font-medium">
                     {['Home', 'About', 'Matches', 'Contact'].map((item, idx) => (
                         <Link
                             key={idx}
-                            to={item === 'Matches' ? '/matches/upcoming' : `/${item.toLowerCase()}`}
+                            to={item === 'Home' ? '/' : item === 'Matches' ? '/matches/upcoming' : `/${item.toLowerCase()}`}
                             className="hover:text-amber-300 transition-colors duration-200 relative group"
                         >
                             {item}
