@@ -13,6 +13,7 @@ import Signup from "./pages/Auth/Signup";
 import ProfilePage from "./pages/profile/ProfilePage";
 import Settings from "./pages/profile/Settings";
 import Chat from "./pages/Chat";
+import Gallery from "./pages/Gallery"
 import { Toaster } from 'react-hot-toast';
 
 function AppLayout() {
@@ -44,6 +45,7 @@ function AppLayout() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/profile/settings" element={<Settings />} />
         <Route path="/chats" element={<Chat />} />
+        <Route path="/gallery" element={<Gallery/>} />
       </Routes>
 
       {/* Hide Footer only on /chats route */}

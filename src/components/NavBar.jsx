@@ -62,9 +62,8 @@ export default function Navbar() {
                 </Link>
 
                 {/* Desktop Nav */}
-                {/* Desktop Nav */}
                 <div className="hidden md:flex items-center space-x-8 font-medium">
-                    {['Home', 'About', 'Matches', 'Contact'].map((item, idx) => (
+                    {['Home', 'About', 'Matches', 'gallery', 'Contact'].map((item, idx) => (
                         <Link
                             key={idx}
                             to={item === 'Home' ? '/' : item === 'Matches' ? '/matches/upcoming' : `/${item.toLowerCase()}`}
@@ -161,6 +160,7 @@ export default function Navbar() {
                                     <Link to="/" onClick={() => setIsOpen(false)} className="block text-xl hover:text-amber-300 py-2">Home</Link>
                                     <Link to="/about" onClick={() => setIsOpen(false)} className="block text-xl hover:text-amber-300 py-2">About</Link>
                                     <Link to="/matches/upcoming" onClick={() => setIsOpen(false)} className="block text-xl hover:text-amber-300 py-2">Matches</Link>
+                                    <Link to="/gallery" onClick={() => setIsOpen(false)} className="block text-xl hover:text-amber-300 py-2">Gallery</Link>
                                     <Link to="/chats" onClick={() => setIsOpen(false)} className="flex items-center gap-3 text-xl hover:text-amber-300 py-2">
                                         <FaRegComment /> Chats
                                     </Link>

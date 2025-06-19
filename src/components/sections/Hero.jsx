@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import Blog from './Blog';
 import Comment from './Comment';
-
+import Faqs from './Faqs';
 // Import fonts (add these to your CSS or tailwind config)
 import './fonts.css'; // Create this file if using CSS
 
@@ -350,6 +350,7 @@ export default function Hero() {
             </section>
 
             <Blog />
+            <Faqs/>
             <Comment />
         </>
     );
