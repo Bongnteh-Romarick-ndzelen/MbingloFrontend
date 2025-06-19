@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 export default function Footer() {
     const currentYear = new Date().getFullYear();
-    
+
     // Animation variants
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -35,7 +35,7 @@ export default function Footer() {
             {/* Decorative elements */}
             <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-green-600 rounded-full opacity-10 blur-xl"></div>
             <div className="absolute -top-10 -left-10 w-40 h-40 bg-green-500 rounded-full opacity-5 blur-lg"></div>
-            
+
             {/* Soccer ball pattern overlay */}
             <div className="absolute inset-0 opacity-5" style={{
                 backgroundImage: "url('data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 20c0-7.4-3.8-14-10-18-6.2 4-10 10.6-10 18s3.8 14 10 18c6.2-4 10-10.6 10-18z' fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E')"
@@ -105,8 +105,8 @@ export default function Footer() {
                                     whileHover={{ x: 5 }}
                                     transition={{ type: "spring", stiffness: 300 }}
                                 >
-                                    <Link 
-                                        to={link.path} 
+                                    <Link
+                                        to={link.path}
                                         className="text-gray-400 hover:text-green-400 transition-colors duration-300 flex items-center gap-2"
                                     >
                                         <span className="w-2 h-2 bg-green-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
@@ -159,7 +159,7 @@ export default function Footer() {
                                 placeholder="Your email address"
                                 className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-white placeholder-gray-500"
                                 required
-                                whileFocus={{ 
+                                whileFocus={{
                                     boxShadow: "0 0 0 2px rgba(16, 185, 129, 0.5)",
                                     backgroundColor: "rgba(31, 41, 55, 0.8)"
                                 }}
@@ -178,7 +178,7 @@ export default function Footer() {
                 </motion.div>
 
                 {/* Divider */}
-                <motion.div 
+                <motion.div
                     className="border-t border-gray-800 my-10"
                     initial={{ width: 0 }}
                     whileInView={{ width: "100%" }}
@@ -216,8 +216,8 @@ export default function Footer() {
                                 whileHover={{ y: -2 }}
                                 whileTap={{ scale: 0.95 }}
                             >
-                                <Link 
-                                    to={link.path} 
+                                <Link
+                                    to={link.path}
                                     className="text-gray-500 hover:text-green-400 text-sm transition-colors duration-300"
                                 >
                                     {link.name}
@@ -227,7 +227,7 @@ export default function Footer() {
                     </div>
                 </motion.div>
 
-                {/* Club Badge at bottom */}
+                {/* Club Badge at bottom
                 <motion.div
                     className="flex justify-center mt-12"
                     initial={{ opacity: 0 }}
@@ -238,7 +238,7 @@ export default function Footer() {
                     <div className="bg-gray-800 p-4 rounded-full border border-gray-700 shadow-lg">
                         <GiSoccerBall className="text-3xl text-green-400" />
                     </div>
-                </motion.div>
+                </motion.div> */}
             </div>
         </footer>
     );
