@@ -51,7 +51,7 @@ export default function Navbar() {
     };
 
     return (
-        <nav className={`fixed left-0 w-full z-50 text-white shadow-md transition-all duration-300 ${scrolled ? 'py-2 bg-gray-900/95 backdrop-blur-sm' : 'py-3 bg-gray-900'}`}>
+        <nav className={`fixed left-0 w-full z-50 top-0 text-white shadow-md transition-all duration-300 ${scrolled ? 'py-2 bg-gray-900/95 backdrop-blur-sm' : 'py-3 bg-gray-900'}`}>
             <div className="container mx-auto px-4 flex justify-between items-center">
                 {/* Logo */}
                 <Link to="/" className="flex items-center gap-3 group">
