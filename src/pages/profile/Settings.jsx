@@ -1,17 +1,16 @@
 import { useState, useEffect } from 'react';
-import { updateUserProfile, getUserProfile } from '../../api/profileService';
+import { updateMyProfile as updateUserProfile, getMyProfile as getUserProfile } from '../../api/profileService';
 import {
     FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaBriefcase,
     FaBirthdayCake, FaVenusMars, FaCalendarAlt, FaCrown, FaUserShield,
-    FaGlobe, FaLinkedin, FaGithub, FaTwitter, FaFilePdf, FaEdit
+    FaEdit
 } from 'react-icons/fa';
-import { ImStack } from 'react-icons/im';
 import { RiVerifiedBadgeFill } from 'react-icons/ri';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
-export default function EditProfilePage() {
+export default function Settings() {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         fullName: '',
@@ -20,91 +19,208 @@ export default function EditProfilePage() {
         location: '',
         occupation: '',
         dateOfBirth: '',
-        sex: '',
-        dateJoined: '',
-        membership_status: '',
+        sex: 'Male',
+        membership_status: 'active',
         userType: '',
         bio: '',
-        profileImage: null,
-        skills: '',
-        website: '',
-        linkedin: '',
-        github: '',
-        twitter: ''
+        profileImage: null
     });
 
     const [previewImage, setPreviewImage] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [authError, setAuthError] = useState(false);
+    const [imageLoadError, setImageLoadError] = useState(false);
 
+    // Handle authentication errors and redirect
     useEffect(() => {
-        const fetchData = async () => {
+        if (authError) {
+            toast.error('Session expired. Redirecting to login...', {
+                position: 'top-center',
+                duration: 3000,
+                style: {
+                    background: '#ef4444',
+                    color: '#ffffff',
+                    fontWeight: 'bold',
+                    padding: '16px',
+                    borderRadius: '12px'
+                }
+            });
+            const timer = setTimeout(() => {
+                navigate('/auth/login', { state: { from: '/profile/settings' } });
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [authError, navigate]);
+
+    // Fetch profile data with comprehensive image handling
+    useEffect(() => {
+        const fetchProfileData = async () => {
             try {
                 const profile = await getUserProfile();
-                const user = profile.user || {};
+                console.log('Profile data received:', profile);
 
+                if (profile?.error === 'Authentication failed') {
+                    setAuthError(true);
+                    return;
+                }
+
+                // Format date for date input
+                const formattedDateOfBirth = profile.dateOfBirth
+                    ? new Date(profile.dateOfBirth).toISOString().split('T')[0]
+                    : '';
+
+                // Update form data
                 setFormData({
-                    fullName: user.fullName || '',
-                    email: user.email || '',
-                    phoneNumber: user.phoneNumber || '',
-                    location: user.location || '',
+                    fullName: profile.user?.fullName || '',
+                    email: profile.user?.email || '',
+                    phoneNumber: profile.user?.phoneNumber || '',
+                    location: profile.user?.location || '',
                     occupation: profile.occupation || '',
-                    dateOfBirth: profile.dateOfBirth ? profile.dateOfBirth.slice(0, 10) : '',
-                    sex: profile.sex || '',
-                    dateJoined: user.dateJoined ? new Date(user.dateJoined).toISOString().slice(0, 10) : '',
-                    membership_status: profile.membership_status || '',
+                    dateOfBirth: formattedDateOfBirth,
+                    sex: profile.sex || 'Male',
+                    membership_status: profile.membership_status || 'active',
                     userType: profile.userType || '',
                     bio: profile.bio || '',
-                    profileImage: null,
-                    skills: profile.skills?.join(', ') || '',
-                    website: profile.socialLinks?.website || '',
-                    linkedin: profile.socialLinks?.linkedin || '',
-                    github: profile.socialLinks?.github || '',
-                    twitter: profile.socialLinks?.twitter || ''
+                    profileImage: null
                 });
 
+                // Handle profile image
                 if (profile.profileImage) {
-                    setPreviewImage(`/${profile.profileImage}`);
+                    await loadProfileImage(profile.profileImage);
                 }
             } catch (err) {
-                console.error('Error loading profile:', err);
-                toast.error('Failed to load profile data');
+                console.error('Profile load error:', err);
+                if (err.response?.status === 401) {
+                    setAuthError(true);
+                } else {
+                    toast.error('Failed to load profile data', {
+                        position: 'top-center',
+                        style: {
+                            background: '#ef4444',
+                            color: '#ffffff',
+                            fontWeight: 'bold',
+                            padding: '16px',
+                            borderRadius: '12px'
+                        }
+                    });
+                }
             } finally {
                 setIsLoading(false);
             }
         };
 
-        fetchData();
+        const loadProfileImage = async (imagePath) => {
+            const baseUrl = import.meta.env.VITE_API_URL || window.location.origin;
+            const imageUrls = [
+                // Try with API base URL
+                `${baseUrl}/${imagePath.replace(/^\/+/, '')}`,
+                // Try with current origin
+                `${window.location.origin}/${imagePath.replace(/^\/+/, '')}`,
+                // Try relative path
+                `/${imagePath.replace(/^\/+/, '')}`
+            ];
+
+            for (const url of imageUrls) {
+                try {
+                    const img = new Image();
+                    img.src = url;
+                    await new Promise((resolve, reject) => {
+                        img.onload = resolve;
+                        img.onerror = reject;
+                    });
+                    console.log('Successfully loaded image from:', url);
+                    setPreviewImage(url);
+                    setImageLoadError(false);
+                    return;
+                } catch (err) {
+                    console.log(`Image load failed for URL: ${url}`);
+                }
+            }
+
+            console.log('All image URL attempts failed');
+            setImageLoadError(true);
+            setPreviewImage('');
+        };
+
+        fetchProfileData();
     }, []);
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
-        setFormData({ ...formData, profileImage: file });
+        if (!file) return;
 
-        if (file) {
-            setPreviewImage(URL.createObjectURL(file));
+        // Validate file size (5MB max)
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error('Image size too large. Max 5MB allowed.', {
+                position: 'top-center',
+                style: {
+                    background: '#ef4444',
+                    color: '#ffffff',
+                    fontWeight: 'bold',
+                    padding: '16px',
+                    borderRadius: '12px'
+                }
+            });
+            return;
         }
+
+        // Validate file type
+        const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!validTypes.includes(file.type)) {
+            toast.error('Invalid file type. Only JPG, PNG, or GIF allowed.', {
+                position: 'top-center',
+                style: {
+                    background: '#ef4444',
+                    color: '#ffffff',
+                    fontWeight: 'bold',
+                    padding: '16px',
+                    borderRadius: '12px'
+                }
+            });
+            return;
+        }
+
+        setFormData(prev => ({ ...prev, profileImage: file }));
+        setPreviewImage(URL.createObjectURL(file));
+        setImageLoadError(false);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (authError) return;
+
         setIsSubmitting(true);
 
-        const payload = new FormData();
-        for (const key in formData) {
-            if (formData[key] !== null && formData[key] !== undefined) {
-                payload.append(key, formData[key]);
-            }
-        }
-
         try {
-            await updateUserProfile(payload);
+            const formPayload = new FormData();
+
+            // Append all fields except null/undefined/empty values
+            Object.entries(formData).forEach(([key, value]) => {
+                if (value !== null && value !== undefined && value !== '') {
+                    if (key === 'profileImage' && !(value instanceof File)) return;
+                    formPayload.append(key, value);
+                }
+            });
+
+            const updatedProfile = await updateUserProfile(formPayload);
+            console.log('Profile update response:', updatedProfile);
+
+            if (updatedProfile.profileImage) {
+                const baseUrl = import.meta.env.VITE_API_URL || window.location.origin;
+                const imageUrl = `${baseUrl}/${updatedProfile.profileImage.replace(/^\/+/, '')}`;
+                setPreviewImage(imageUrl);
+                setImageLoadError(false);
+            }
+
             toast.success('Profile updated successfully!', {
                 position: 'top-center',
+                duration: 3000,
                 style: {
                     background: '#10b981',
                     color: '#ffffff',
@@ -117,10 +233,20 @@ export default function EditProfilePage() {
                     secondary: '#10b981'
                 }
             });
+
             setTimeout(() => navigate('/profile'), 1500);
         } catch (err) {
-            console.error('Update failed:', err);
-            toast.error('Failed to update profile. Please try again.', {
+            console.error('Update error:', err);
+            if (err.response?.status === 401) {
+                setAuthError(true);
+                return;
+            }
+
+            const errorMessage = err.response?.data?.message ||
+                err.message ||
+                'Failed to update profile. Please try again.';
+
+            toast.error(errorMessage, {
                 position: 'top-center',
                 style: {
                     background: '#ef4444',
@@ -134,6 +260,28 @@ export default function EditProfilePage() {
             setIsSubmitting(false);
         }
     };
+
+    if (authError) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-[#0b3d2e] to-[#0d1f1a] flex items-center justify-center">
+                <div className="text-center p-6 bg-green-950 rounded-xl shadow-lg">
+                    <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="text-red-400 text-xl font-bold mb-4"
+                    >
+                        Session Expired
+                    </motion.div>
+                    <p className="text-green-300">You will be redirected to the login page shortly...</p>
+                    <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                        className="w-12 h-12 border-4 border-green-400 border-t-transparent rounded-full mx-auto mt-6"
+                    />
+                </div>
+            </div>
+        );
+    }
 
     if (isLoading) {
         return (
@@ -150,7 +298,7 @@ export default function EditProfilePage() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#0b3d2e] to-[#0d1f1a] text-white px-4 py-8">
             <div className="max-w-4xl mx-auto mt-6">
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
@@ -169,18 +317,23 @@ export default function EditProfilePage() {
                         </button>
                     </div>
 
-                    <form onSubmit={handleSubmit} encType="multipart/form-data">
+                    <form onSubmit={handleSubmit}>
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                             {/* Left Column - Profile Image */}
                             <div className="lg:col-span-1">
                                 <div className="flex flex-col items-center">
                                     <div className="relative mb-4">
                                         <div className="w-32 h-32 rounded-full border-4 border-green-500 shadow-md overflow-hidden bg-green-900 flex items-center justify-center">
-                                            {previewImage ? (
+                                            {previewImage && !imageLoadError ? (
                                                 <img
                                                     src={previewImage}
                                                     alt="Profile preview"
                                                     className="w-full h-full object-cover"
+                                                    onError={() => {
+                                                        console.error('Failed to load profile image');
+                                                        setImageLoadError(true);
+                                                    }}
+                                                    crossOrigin="anonymous"
                                                 />
                                             ) : (
                                                 <FaUser className="text-4xl text-green-400" />
@@ -197,88 +350,98 @@ export default function EditProfilePage() {
                                         Change Photo
                                         <input
                                             type="file"
-                                            accept="image/*"
+                                            accept="image/jpeg, image/png, image/gif"
                                             onChange={handleImageChange}
                                             className="hidden"
                                         />
                                     </label>
-                                    <p className="text-xs text-green-400 mt-2">JPG, PNG (Max 2MB)</p>
-                                </div>
-
-                                <div className="mt-8">
-                                    <h3 className="text-lg font-semibold mb-4 text-green-300">Social Links</h3>
-                                    <InputField 
-                                        icon={<FaGlobe />} 
-                                        label="Website" 
-                                        name="website" 
-                                        value={formData.website} 
-                                        onChange={handleChange} 
-                                        placeholder="https://yourwebsite.com"
-                                    />
-                                    <InputField 
-                                        icon={<FaLinkedin />} 
-                                        label="LinkedIn" 
-                                        name="linkedin" 
-                                        value={formData.linkedin} 
-                                        onChange={handleChange} 
-                                        placeholder="https://linkedin.com/in/username"
-                                    />
-                                    <InputField 
-                                        icon={<FaGithub />} 
-                                        label="GitHub" 
-                                        name="github" 
-                                        value={formData.github} 
-                                        onChange={handleChange} 
-                                        placeholder="https://github.com/username"
-                                    />
-                                    <InputField 
-                                        icon={<FaTwitter />} 
-                                        label="Twitter" 
-                                        name="twitter" 
-                                        value={formData.twitter} 
-                                        onChange={handleChange} 
-                                        placeholder="https://twitter.com/username"
-                                    />
+                                    <p className="text-xs text-green-400 mt-2">JPG, PNG (Max 5MB)</p>
                                 </div>
                             </div>
 
                             {/* Right Column - Form Fields */}
                             <div className="lg:col-span-2">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <InputField icon={<FaUser />} label="Full Name" name="fullName" value={formData.fullName} onChange={handleChange} required />
-                                    <InputField icon={<FaEnvelope />} label="Email Address" name="email" value={formData.email} onChange={handleChange} type="email" required />
-                                    <InputField icon={<FaPhone />} label="Phone Number" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} type="tel" />
-                                    <InputField icon={<FaMapMarkerAlt />} label="Location" name="location" value={formData.location} onChange={handleChange} />
-                                    <InputField icon={<FaBriefcase />} label="Occupation" name="occupation" value={formData.occupation} onChange={handleChange} />
-                                    <InputField icon={<FaBirthdayCake />} label="Date of Birth" name="dateOfBirth" value={formData.dateOfBirth} type="date" onChange={handleChange} />
-                                    <SelectField 
-                                        icon={<FaVenusMars />} 
-                                        label="Gender" 
-                                        name="sex" 
-                                        value={formData.sex} 
+                                    <InputField
+                                        icon={<FaUser />}
+                                        label="Full Name"
+                                        name="fullName"
+                                        value={formData.fullName}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                    <InputField
+                                        icon={<FaEnvelope />}
+                                        label="Email Address"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        type="email"
+                                        required
+                                    />
+                                    <InputField
+                                        icon={<FaPhone />}
+                                        label="Phone Number"
+                                        name="phoneNumber"
+                                        value={formData.phoneNumber}
+                                        onChange={handleChange}
+                                        type="tel"
+                                    />
+                                    <InputField
+                                        icon={<FaMapMarkerAlt />}
+                                        label="Location"
+                                        name="location"
+                                        value={formData.location}
+                                        onChange={handleChange}
+                                    />
+                                    <InputField
+                                        icon={<FaBriefcase />}
+                                        label="Occupation"
+                                        name="occupation"
+                                        value={formData.occupation}
+                                        onChange={handleChange}
+                                    />
+                                    <InputField
+                                        icon={<FaBirthdayCake />}
+                                        label="Date of Birth"
+                                        name="dateOfBirth"
+                                        value={formData.dateOfBirth}
+                                        type="date"
+                                        onChange={handleChange}
+                                    />
+                                    <SelectField
+                                        icon={<FaVenusMars />}
+                                        label="Gender"
+                                        name="sex"
+                                        value={formData.sex}
                                         onChange={handleChange}
                                         options={[
-                                            { value: '', label: 'Select gender' },
                                             { value: 'Male', label: 'Male' },
                                             { value: 'Female', label: 'Female' },
-                                            { value: 'Other', label: 'Other' },
-                                            { value: 'Prefer not to say', label: 'Prefer not to say' }
+                                            { value: 'Other', label: 'Other' }
                                         ]}
                                     />
-                                    <SelectField 
-                                        icon={<FaCrown />} 
-                                        label="Membership" 
-                                        name="membership_status" 
-                                        value={formData.membership_status} 
+                                    <SelectField
+                                        icon={<FaCrown />}
+                                        label="Membership"
+                                        name="membership_status"
+                                        value={formData.membership_status}
                                         onChange={handleChange}
                                         options={[
-                                            { value: 'Basic', label: 'Basic' },
-                                            { value: 'Premium', label: 'Premium' },
-                                            { value: 'Professional', label: 'Professional' }
+                                            { value: 'active', label: 'Active' },
+                                            { value: 'inactive', label: 'Inactive' },
+                                            { value: 'pending', label: 'Pending' },
+                                            { value: 'premium', label: 'Premium' }
                                         ]}
                                     />
-                                    <InputField icon={<FaCalendarAlt />} label="Joined" name="dateJoined" value={formData.dateJoined} type="date" onChange={handleChange} disabled />
-                                    <InputField icon={<FaUserShield />} label="User Type" name="userType" value={formData.userType} onChange={handleChange} disabled />
+                                    <InputField
+                                        icon={<FaUserShield />}
+                                        label="User Type"
+                                        name="userType"
+                                        value={formData.userType}
+                                        onChange={handleChange}
+                                        disabled
+                                    />
                                 </div>
 
                                 <div className="mt-6">
@@ -290,18 +453,6 @@ export default function EditProfilePage() {
                                         rows={4}
                                         className="w-full bg-green-800 border border-green-700 rounded-lg px-4 py-3 text-white placeholder-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                                         placeholder="Tell us about yourself, your experience, and your interests..."
-                                    />
-                                </div>
-
-                                <div className="mt-6">
-                                    <label className="text-green-400 text-sm mb-2 block font-medium">Skills (comma separated)</label>
-                                    <textarea
-                                        name="skills"
-                                        value={formData.skills}
-                                        onChange={handleChange}
-                                        rows={2}
-                                        className="w-full bg-green-800 border border-green-700 rounded-lg px-4 py-2 text-white placeholder-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                                        placeholder="React, Node.js, TypeScript, Design, etc."
                                     />
                                 </div>
 
@@ -342,7 +493,7 @@ export default function EditProfilePage() {
     );
 }
 
-function InputField({ icon, label, name, value, onChange, type = "text", disabled = false, required = false, placeholder }) {
+function InputField({ icon, label, name, value, onChange, type = "text", disabled = false, required = false }) {
     return (
         <div className="mb-4">
             <label className="text-green-400 mb-2 text-sm flex items-center gap-2 font-medium">
@@ -357,8 +508,8 @@ function InputField({ icon, label, name, value, onChange, type = "text", disable
                 onChange={onChange}
                 disabled={disabled}
                 required={required}
-                className={`w-full bg-green-800 border border-green-700 rounded-lg px-4 py-2 text-white ${placeholder ? 'placeholder-green-300' : ''} focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all ${disabled ? 'opacity-70 cursor-not-allowed' : ''}`}
-                placeholder={placeholder || `Enter ${label.toLowerCase()}`}
+                className={`w-full bg-green-800 border border-green-700 rounded-lg px-4 py-2 text-white placeholder-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all ${disabled ? 'opacity-70 cursor-not-allowed' : ''}`}
+                placeholder={`Enter ${label.toLowerCase()}`}
             />
         </div>
     );

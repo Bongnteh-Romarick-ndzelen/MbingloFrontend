@@ -1,45 +1,46 @@
 import axios from 'axios';
-import { refreshAccessToken } from './authService';
+import { getAuthToken } from './auth'; // You'll need to implement this
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL: 'http://localhost:3000/api',
+  withCredentials: true // Important for cookies
 });
 
-// Request interceptor: Attach access token if available
-api.interceptors.request.use(
-  (config) => {
-    const accessToken = localStorage.getItem('accessToken');
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
-    }
-    return config;
-  },
-  (error) => {
-    console.error('Request interceptor error:', error);
-    return Promise.reject(error);
+// Request interceptor to add auth token
+api.interceptors.request.use(config => {
+  const token = getAuthToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-);
+  return config;
+}, error => {
+  return Promise.reject(error);
+});
 
-// Response interceptor: Handle 401 and refresh token
+// Response interceptor to handle token refresh
 api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+  response => response,
+  async error => {
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
+
       try {
-        const { token: newAccessToken } = await refreshAccessToken();
-        localStorage.setItem('accessToken', newAccessToken);
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        // Attempt to refresh token
+        const { data } = await axios.post(
+          'http://localhost:3000/api/auth/refresh-token',
+          {},
+          { withCredentials: true }
+        );
+
+        // Store the new token
+        setAuthToken(data.accessToken);
+
+        // Retry original request
         return api(originalRequest);
       } catch (refreshError) {
-        console.error('Token refresh failed:', refreshError);
-        localStorage.removeItem('accessToken');
+        // Redirect to login if refresh fails
         window.location.href = '/login';
         return Promise.reject(refreshError);
       }
