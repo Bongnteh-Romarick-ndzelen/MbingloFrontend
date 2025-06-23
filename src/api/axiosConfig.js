@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getAuthToken } from './auth'; // You'll need to implement this
 
 const api = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  baseURL: 'https://mbinglobackend.onrender.com/api',
   withCredentials: true // Important for cookies
 });
 
@@ -29,7 +29,7 @@ api.interceptors.response.use(
       try {
         // Attempt to refresh token
         const { data } = await axios.post(
-          'http://localhost:3000/api/auth/refresh-token',
+          'https://mbinglobackend.onrender.com/api/auth/refresh-token',
           {},
           { withCredentials: true }
         );
