@@ -17,7 +17,12 @@ import { Toaster } from 'react-hot-toast';
 import Gallery from "./pages/Gallery";
 import NotFound from "./pages/NotFound";
 
-// List of all valid routes
+// Define valid routes for the application
+// This will be used to determine if the current route is valid or not
+// If the route is not in this list, it will be considered a 404 page
+// and the Navbar and Footer will not be displayed.
+// This is useful for handling 404 pages and ensuring the layout is consistent.
+// You can add more routes to this list as your application grows.
 const validRoutes = [
   '/',
   '/about',

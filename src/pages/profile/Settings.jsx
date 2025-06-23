@@ -150,7 +150,7 @@ export default function EditProfilePage() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#0b3d2e] to-[#0d1f1a] text-white px-4 py-8">
             <div className="max-w-4xl mx-auto mt-6">
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
@@ -207,36 +207,36 @@ export default function EditProfilePage() {
 
                                 <div className="mt-8">
                                     <h3 className="text-lg font-semibold mb-4 text-green-300">Social Links</h3>
-                                    <InputField 
-                                        icon={<FaGlobe />} 
-                                        label="Website" 
-                                        name="website" 
-                                        value={formData.website} 
-                                        onChange={handleChange} 
+                                    <InputField
+                                        icon={<FaGlobe />}
+                                        label="Website"
+                                        name="website"
+                                        value={formData.website}
+                                        onChange={handleChange}
                                         placeholder="https://yourwebsite.com"
                                     />
-                                    <InputField 
-                                        icon={<FaLinkedin />} 
-                                        label="LinkedIn" 
-                                        name="linkedin" 
-                                        value={formData.linkedin} 
-                                        onChange={handleChange} 
+                                    <InputField
+                                        icon={<FaLinkedin />}
+                                        label="LinkedIn"
+                                        name="linkedin"
+                                        value={formData.linkedin}
+                                        onChange={handleChange}
                                         placeholder="https://linkedin.com/in/username"
                                     />
-                                    <InputField 
-                                        icon={<FaGithub />} 
-                                        label="GitHub" 
-                                        name="github" 
-                                        value={formData.github} 
-                                        onChange={handleChange} 
+                                    <InputField
+                                        icon={<FaGithub />}
+                                        label="GitHub"
+                                        name="github"
+                                        value={formData.github}
+                                        onChange={handleChange}
                                         placeholder="https://github.com/username"
                                     />
-                                    <InputField 
-                                        icon={<FaTwitter />} 
-                                        label="Twitter" 
-                                        name="twitter" 
-                                        value={formData.twitter} 
-                                        onChange={handleChange} 
+                                    <InputField
+                                        icon={<FaTwitter />}
+                                        label="Twitter"
+                                        name="twitter"
+                                        value={formData.twitter}
+                                        onChange={handleChange}
                                         placeholder="https://twitter.com/username"
                                     />
                                 </div>
@@ -251,11 +251,11 @@ export default function EditProfilePage() {
                                     <InputField icon={<FaMapMarkerAlt />} label="Location" name="location" value={formData.location} onChange={handleChange} />
                                     <InputField icon={<FaBriefcase />} label="Occupation" name="occupation" value={formData.occupation} onChange={handleChange} />
                                     <InputField icon={<FaBirthdayCake />} label="Date of Birth" name="dateOfBirth" value={formData.dateOfBirth} type="date" onChange={handleChange} />
-                                    <SelectField 
-                                        icon={<FaVenusMars />} 
-                                        label="Gender" 
-                                        name="sex" 
-                                        value={formData.sex} 
+                                    <SelectField
+                                        icon={<FaVenusMars />}
+                                        label="Gender"
+                                        name="sex"
+                                        value={formData.sex}
                                         onChange={handleChange}
                                         options={[
                                             { value: '', label: 'Select gender' },
@@ -265,11 +265,11 @@ export default function EditProfilePage() {
                                             { value: 'Prefer not to say', label: 'Prefer not to say' }
                                         ]}
                                     />
-                                    <SelectField 
-                                        icon={<FaCrown />} 
-                                        label="Membership" 
-                                        name="membership_status" 
-                                        value={formData.membership_status} 
+                                    <SelectField
+                                        icon={<FaCrown />}
+                                        label="Membership"
+                                        name="membership_status"
+                                        value={formData.membership_status}
                                         onChange={handleChange}
                                         options={[
                                             { value: 'Basic', label: 'Basic' },

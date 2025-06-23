@@ -3,8 +3,8 @@ import api from './axiosConfig';
 // Get logged-in user's profile
 export const getUserProfile = async () => {
     try {
-    const response = await api.get('/profile/me');
-    return response.data;
+        const response = await api.get('/profile/me');
+        return response.data;
     } catch (error) {
         console.error("Failed to fetch user profile:", error);
         throw error;
@@ -20,8 +20,8 @@ export const updateUserProfile = async (profileData) => {
         }
     }
     try {
-    const response = await api.put('/profile/me', formData);
-    return response.data;
+        const response = await api.put('/profile/me', formData);
+        return response.data;
     } catch (error) {
         console.error("Failed to update user profile:", error);
         throw error;

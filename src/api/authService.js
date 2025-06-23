@@ -5,6 +5,8 @@ export const registerUser = async (userData) => {
     const response = await api.post('/auth/register', userData);
 
     // Ensure consistent response structure
+    // Check if response data is present
+    // and if it contains the expected fields
     if (!response.data) {
       throw new Error('No data received from server');
     }

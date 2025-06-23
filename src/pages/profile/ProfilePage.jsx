@@ -73,7 +73,7 @@ export default function ProfilePage() {
                 <div className="flex justify-between items-center mb-6 mt-15">
                     <h1 className="text-2xl font-bold text-green-300">Profile</h1>
                     <div className="relative">
-                        <button 
+                        <button
                             className="p-2 rounded-full bg-green-900 hover:bg-green-800 transition-colors"
                             aria-label="Notifications"
                         >
@@ -91,7 +91,7 @@ export default function ProfilePage() {
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                     {/* Left Sidebar */}
                     <div className="lg:col-span-1 space-y-6">
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5 }}
@@ -110,39 +110,39 @@ export default function ProfilePage() {
                                         </div>
                                     )}
                                 </div>
-                                
+
                                 <h2 className="text-xl font-bold text-center text-green-300">{profile.user.fullName}</h2>
                                 <p className="text-gray-400 text-center">{profile.occupation}</p>
-                                
+
                                 <div className="flex space-x-2 mt-4">
-                                    <SocialIcon 
-                                        href={profile.socialLinks.linkedin} 
-                                        icon={<FaLinkedin />} 
-                                        tooltip="LinkedIn" 
+                                    <SocialIcon
+                                        href={profile.socialLinks.linkedin}
+                                        icon={<FaLinkedin />}
+                                        tooltip="LinkedIn"
                                     />
-                                    <SocialIcon 
-                                        href={profile.socialLinks.github} 
-                                        icon={<FaGithub />} 
-                                        tooltip="GitHub" 
+                                    <SocialIcon
+                                        href={profile.socialLinks.github}
+                                        icon={<FaGithub />}
+                                        tooltip="GitHub"
                                     />
-                                    <SocialIcon 
-                                        href={profile.socialLinks.twitter} 
-                                        icon={<FaTwitter />} 
-                                        tooltip="Twitter" 
+                                    <SocialIcon
+                                        href={profile.socialLinks.twitter}
+                                        icon={<FaTwitter />}
+                                        tooltip="Twitter"
                                     />
-                                    <SocialIcon 
-                                        href={profile.socialLinks.website} 
-                                        icon={<FaGlobe />} 
-                                        tooltip="Website" 
+                                    <SocialIcon
+                                        href={profile.socialLinks.website}
+                                        icon={<FaGlobe />}
+                                        tooltip="Website"
                                     />
                                 </div>
-                                
+
                                 <div className="mt-6 grid grid-cols-3 gap-4 text-center">
                                     <StatItem value={profile.stats.projects} label="Projects" />
                                     <StatItem value={profile.stats.connections} label="Connections" />
                                     <StatItem value={profile.stats.recommendations} label="Recs" />
                                 </div>
-                                
+
                                 <Link to="/profile/settings" className="w-full mt-6">
                                     <motion.button
                                         whileHover={{ scale: 1.02 }}
@@ -155,9 +155,9 @@ export default function ProfilePage() {
                                 </Link>
                             </div>
                         </motion.div>
-                        
+
                         {/* Skills Section */}
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.1 }}
@@ -169,7 +169,7 @@ export default function ProfilePage() {
                             </h3>
                             <div className="flex flex-wrap gap-2">
                                 {profile.skills.map((skill, index) => (
-                                    <span 
+                                    <span
                                         key={index}
                                         className="bg-green-900 text-green-200 px-3 py-1 rounded-full text-sm"
                                     >
@@ -179,10 +179,10 @@ export default function ProfilePage() {
                             </div>
                         </motion.div>
                     </div>
-                    
+
                     {/* Main Content */}
                     <div className="lg:col-span-3 space-y-6">
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.2 }}
@@ -193,7 +193,7 @@ export default function ProfilePage() {
                                 <h3 className="text-lg font-semibold mb-2 text-green-300">About</h3>
                                 <p className="text-gray-300">{profile.bio}</p>
                             </div>
-                            
+
                             {/* Tabs */}
                             <div className="border-b border-green-800 mb-6">
                                 <nav className="flex space-x-4">
@@ -217,85 +217,85 @@ export default function ProfilePage() {
                                     </button>
                                 </nav>
                             </div>
-                            
+
                             {/* Tab Content */}
                             {activeTab === 'overview' && (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <ProfileCardItem 
-                                        icon={<FaUser className="text-green-400" />} 
-                                        label="Full Name" 
-                                        value={profile.user.fullName} 
+                                    <ProfileCardItem
+                                        icon={<FaUser className="text-green-400" />}
+                                        label="Full Name"
+                                        value={profile.user.fullName}
                                     />
-                                    <ProfileCardItem 
-                                        icon={<FaEnvelope className="text-green-400" />} 
-                                        label="Email Address" 
+                                    <ProfileCardItem
+                                        icon={<FaEnvelope className="text-green-400" />}
+                                        label="Email Address"
                                         value={
                                             <a href={`mailto:${profile.user.email}`} className="hover:text-green-300">
                                                 {profile.user.email}
                                             </a>
-                                        } 
+                                        }
                                     />
-                                    <ProfileCardItem 
-                                        icon={<FaPhone className="text-green-400" />} 
-                                        label="Phone Number" 
+                                    <ProfileCardItem
+                                        icon={<FaPhone className="text-green-400" />}
+                                        label="Phone Number"
                                         value={
                                             <a href={`tel:${profile.user.phoneNumber.replace(/\D/g, '')}`} className="hover:text-green-300">
                                                 {profile.user.phoneNumber}
                                             </a>
-                                        } 
+                                        }
                                     />
-                                    <ProfileCardItem 
-                                        icon={<FaMapMarkerAlt className="text-green-400" />} 
-                                        label="Location" 
-                                        value={profile.user.location} 
+                                    <ProfileCardItem
+                                        icon={<FaMapMarkerAlt className="text-green-400" />}
+                                        label="Location"
+                                        value={profile.user.location}
                                     />
-                                    <ProfileCardItem 
-                                        icon={<FaBriefcase className="text-green-400" />} 
-                                        label="Occupation" 
-                                        value={profile.occupation} 
+                                    <ProfileCardItem
+                                        icon={<FaBriefcase className="text-green-400" />}
+                                        label="Occupation"
+                                        value={profile.occupation}
                                     />
-                                    <ProfileCardItem 
-                                        icon={<FaBirthdayCake className="text-green-400" />} 
-                                        label="Date of Birth" 
-                                        value={formatDate(profile.dateOfBirth)} 
+                                    <ProfileCardItem
+                                        icon={<FaBirthdayCake className="text-green-400" />}
+                                        label="Date of Birth"
+                                        value={formatDate(profile.dateOfBirth)}
                                     />
-                                    <ProfileCardItem 
-                                        icon={<FaVenusMars className="text-green-400" />} 
-                                        label="Gender" 
-                                        value={profile.sex} 
+                                    <ProfileCardItem
+                                        icon={<FaVenusMars className="text-green-400" />}
+                                        label="Gender"
+                                        value={profile.sex}
                                     />
-                                    <ProfileCardItem 
-                                        icon={<FaCalendarAlt className="text-green-400" />} 
-                                        label="Member Since" 
-                                        value={formatDate(profile.user.dateJoined)} 
+                                    <ProfileCardItem
+                                        icon={<FaCalendarAlt className="text-green-400" />}
+                                        label="Member Since"
+                                        value={formatDate(profile.user.dateJoined)}
                                     />
-                                    <ProfileCardItem 
-                                        icon={<FaCrown className="text-green-400" />} 
-                                        label="Membership" 
+                                    <ProfileCardItem
+                                        icon={<FaCrown className="text-green-400" />}
+                                        label="Membership"
                                         value={
                                             <span className="bg-yellow-600 text-yellow-100 px-2 py-1 rounded text-xs">
                                                 {profile.membership_status}
                                             </span>
-                                        } 
+                                        }
                                     />
-                                    <ProfileCardItem 
-                                        icon={<FaUserShield className="text-green-400" />} 
-                                        label="User Type" 
+                                    <ProfileCardItem
+                                        icon={<FaUserShield className="text-green-400" />}
+                                        label="User Type"
                                         value={
                                             <span className="bg-purple-600 text-purple-100 px-2 py-1 rounded text-xs">
                                                 {profile.userType}
                                             </span>
-                                        } 
+                                        }
                                     />
                                 </div>
                             )}
-                            
+
                             {activeTab === 'activity' && (
                                 <div className="text-center py-8">
                                     <p className="text-gray-400">Recent activity will appear here</p>
                                 </div>
                             )}
-                            
+
                             {activeTab === 'portfolio' && (
                                 <div className="text-center py-8">
                                     <p className="text-gray-400 mb-4">Featured projects will appear here</p>
